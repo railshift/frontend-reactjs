@@ -1,8 +1,8 @@
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL;
 // Create axios instance with default config
 const api = axios.create({
- baseURL: process.env.VITE_API_URL,
+ baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -35,7 +35,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${process.env.VITE_API_URL}/auth/refresh`, {
+          const response = await axios.post(`${API_URL}/auth/refresh`, {
             refreshToken,
           });
 

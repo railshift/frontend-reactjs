@@ -7,7 +7,7 @@ const shiftService = {
    * @returns {Promise} - Created shift data
    */
   createShift: async (shiftData) => {
-    const response = await api.post('/shifts', shiftData);
+    const response = await api.post('api/v1/shifts', shiftData);
     return response.data;
   },
 
@@ -17,7 +17,7 @@ const shiftService = {
    * @returns {Promise} - { data: Array of shifts, pagination: { total, page, limit, pages } }
    */
   getAllShifts: async (filters = {}) => {
-    const response = await api.get('/shifts', { params: filters });
+    const response = await api.get('api/v1/shifts', { params: filters });
     return response.data; // Returns { success, data, pagination }
   },
 
@@ -27,7 +27,7 @@ const shiftService = {
    * @returns {Promise} - Shift details
    */
   getShiftById: async (shiftId) => {
-    const response = await api.get(`/shifts/${shiftId}`);
+    const response = await api.get(`api/v1/shifts/${shiftId}`);
     return response.data;
   },
 
@@ -38,7 +38,7 @@ const shiftService = {
    * @returns {Promise} - Updated shift data
    */
   updateShift: async (shiftId, updateData) => {
-    const response = await api.patch(`/shifts/${shiftId}`, updateData);
+    const response = await api.patch(`api/v1/shifts/${shiftId}`, updateData);
     return response.data;
   },
 
@@ -48,7 +48,7 @@ const shiftService = {
    * @returns {Promise}
    */
   deleteShift: async (shiftId) => {
-    const response = await api.delete(`/shifts/${shiftId}`);
+    const response = await api.delete(`api/v1/shifts/${shiftId}`);
     return response.data;
   },
 
@@ -57,7 +57,7 @@ const shiftService = {
    * @returns {Promise} - Array of active shifts
    */
   getActiveShifts: async () => {
-    const response = await api.get('/shifts/active');
+    const response = await api.get('api/v1/shifts/active');
     return response.data;
   },
 
@@ -67,7 +67,7 @@ const shiftService = {
    * @returns {Promise} - Shift logs/alerts history
    */
   getShiftLogs: async (shiftId) => {
-    const response = await api.get(`/shifts/${shiftId}/logs`);
+    const response = await api.get(`api/v1/shifts/${shiftId}/logs`);
     return response.data;
   },
 
@@ -78,7 +78,7 @@ const shiftService = {
    * @returns {Promise} - Completed shift data
    */
   completeShift: async (shiftId, signOffData) => {
-    const response = await api.post(`/shifts/${shiftId}/complete`, signOffData);
+    const response = await api.post(`api/v1/shifts/${shiftId}/complete`, signOffData);
     return response.data;
   },
 
@@ -89,7 +89,7 @@ const shiftService = {
    * @returns {Promise} - Response confirmation
    */
   submitAlertResponse: async (shiftId, responseData) => {
-    const response = await api.post(`/shifts/${shiftId}/alert-response`, responseData);
+    const response = await api.post(`api/v1/shifts/${shiftId}/alert-response`, responseData);
     return response.data;
   },
 
@@ -99,7 +99,7 @@ const shiftService = {
    * @returns {Promise} - Alert history
    */
   getShiftAlertHistory: async (shiftId) => {
-    const response = await api.get(`/shifts/${shiftId}/alerts`);
+    const response = await api.get(`api/v1/shifts/${shiftId}/alerts`);
     return response.data;
   },
 
@@ -108,7 +108,7 @@ const shiftService = {
    * @returns {Promise} - Summary of active shifts
    */
   getActiveShiftsSummary: async () => {
-    const response = await api.get('/shifts/active/summary');
+    const response = await api.get('api/v1/shifts/active/summary');
     return response.data;
   },
 };

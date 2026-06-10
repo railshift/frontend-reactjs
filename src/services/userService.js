@@ -17,7 +17,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, data: users[], pagination }
    */
   getAllUsers: async (params = {}) => {
-    const response = await api.get('/users', { params });
+    const response = await api.get('api/v1/users', { params });
     return response.data;
   },
 
@@ -27,7 +27,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, data: users[] }
    */
   getPendingRequests: async () => {
-    const response = await api.get('/users/pending-requests');
+    const response = await api.get('api/v1/users/pending-requests');
     return response.data;
   },
 
@@ -38,7 +38,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, data: user }
    */
   getUserById: async (userId) => {
-    const response = await api.get(`/users/${userId}`);
+    const response = await api.get(`api/v1/users/${userId}`);
     return response.data;
   },
 
@@ -49,7 +49,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, message, data: user }
    */
   approveUser: async (userId) => {
-    const response = await api.post(`/users/${userId}/approve`);
+    const response = await api.post(`api/v1/users/${userId}/approve`);
     return response.data;
   },
 
@@ -61,7 +61,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, message }
    */
   rejectUser: async (userId, reason) => {
-    const response = await api.post(`/users/${userId}/reject`, { reason });
+    const response = await api.post(`api/v1/users/${userId}/reject`, { reason });
     return response.data;
   },
 
@@ -73,7 +73,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, message, data: user }
    */
   changeUserRole: async (userId, role) => {
-    const response = await api.patch(`/users/${userId}/role`, { role });
+    const response = await api.patch(`api/v1/users/${userId}/role`, { role });
     return response.data;
   },
 
@@ -85,7 +85,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, message, data: user }
    */
   updateUser: async (userId, userData) => {
-    const response = await api.patch(`/users/${userId}`, userData);
+    const response = await api.patch(`api/v1/users/${userId}`, userData);
     return response.data;
   },
 
@@ -96,7 +96,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, message, data: user }
    */
   activateUser: async (userId) => {
-    const response = await api.post(`/users/${userId}/activate`);
+    const response = await api.post(`api/v1/users/${userId}/activate`);
     return response.data;
   },
 
@@ -107,7 +107,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, message, data: user }
    */
   deactivateUser: async (userId) => {
-    const response = await api.post(`/users/${userId}/deactivate`);
+    const response = await api.post(`api/v1/users/${userId}/deactivate`);
     return response.data;
   },
 
@@ -118,7 +118,7 @@ const userService = {
    * @returns {Promise<Object>} - { success, message }
    */
   deleteUser: async (userId) => {
-    const response = await api.delete(`/users/${userId}`);
+    const response = await api.delete(`api/v1/users/${userId}`);
     return response.data;
   },
 };

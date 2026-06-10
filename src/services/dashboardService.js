@@ -6,7 +6,7 @@ const dashboardService = {
    * @returns {Promise} - Dashboard stats
    */
   getStats: async () => {
-    const response = await api.get('/dashboard/stats');
+    const response = await api.get('api/v1/dashboard/stats');
     return response.data;
   },
 
@@ -19,7 +19,7 @@ const dashboardService = {
    * @returns {Promise} - Recent activities
    */
   getRecentActivities: async (params = {}) => {
-    const response = await api.get('/dashboard/recent-activities', { params });
+    const response = await api.get('api/v1/dashboard/recent-activities', { params });
     return response.data;
   },
 
@@ -29,7 +29,7 @@ const dashboardService = {
    * @returns {Promise} - Shift trends
    */
   getTrends: async (days = 7) => {
-    const response = await api.get('/dashboard/trends', { params: { days } });
+    const response = await api.get('api/v1/dashboard/trends', { params: { days } });
     return response.data;
   },
 
@@ -38,7 +38,7 @@ const dashboardService = {
    * @returns {Promise} - Alerts summary
    */
   getAlertsSummary: async () => {
-    const response = await api.get('/dashboard/alerts-summary');
+    const response = await api.get('api/v1/dashboard/alerts-summary');
     return response.data;
   },
 };

@@ -273,7 +273,7 @@ const SignupPage = () => {
                 required
               >
                 <option value="">Select Division</option>
-                <option value="CENTRAL">CENTRAL</option>
+                <option value="CENTRAL">Ranchi</option>
               </select>
               {errors.division && (
                 <p className="mt-1 text-sm text-red-600">{errors.division}</p>

@@ -294,9 +294,9 @@ const SignupPage = () => {
                 required
               >
                 <option value="">Select Designation</option>
-                <option value="X">X</option>
-                <option value="Y">Y</option>
-                <option value="Z">Z</option>
+                <option value="X">Supervisor</option>
+                <option value="Y">Officer</option>
+                <option value="Z">Chaser</option>
               </select>
               {errors.designation && (
                 <p className="mt-1 text-sm text-red-600">{errors.designation}</p>

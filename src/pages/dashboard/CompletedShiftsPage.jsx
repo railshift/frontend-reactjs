@@ -145,7 +145,7 @@ const CompletedShiftsPage = () => {
     
     // Prepare comprehensive data with all shift information
     const worksheetData = [
-      ['Indian Railways - Completed Shifts Report'],
+      ['dutyhours.in - Completed Shifts Report'],
       [],
       ['Generated On:', dayjs().format('DD MMM YYYY HH:mm:ss')],
       ['Date Range:', `${dayjs(filters.dateFrom).format('DD MMM YYYY')} to ${dayjs(filters.dateTo).format('DD MMM YYYY')}`],

@@ -152,7 +152,7 @@ const SignupPage = () => {
             <FaTrain className="text-6xl text-[#003d82]" />
           </div>
           <h1 className="text-3xl font-bold text-[#003d82] mb-2">Request Access</h1>
-          <p className="text-gray-600">Indian Railways - Shift Management</p>
+          <p className="text-gray-600">dutyhours.in - Shift Management</p>
           <div className="h-1 w-20 bg-[#d32f2f] mx-auto mt-3"></div>
         </div>
 

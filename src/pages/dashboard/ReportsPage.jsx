@@ -129,7 +129,7 @@ const ReportsPage = () => {
     
     // ===== SHEET 1: Summary =====
     const summaryData = [
-      ['INDIAN RAILWAYS - DUTY HOURS REPORT'],
+      ['DUTYHOURS.IN - DUTY HOURS REPORT'],
       [],
       ['Report Information'],
       ['Report Type', filters.reportType],
@@ -146,7 +146,7 @@ const ReportsPage = () => {
       ['Relief Planned', reportData.summary.reliefPlanned],
       ['Compliance Rate', reportData.summary.complianceRate + '%'],
       [],
-      ['Note: This report is generated from the Indian Railways Shift Management System'],
+      ['Note: This report is generated from the dutyhours.in Shift Management System'],
     ];
     
     const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
@@ -246,7 +246,7 @@ const ReportsPage = () => {
     const worksheetData = [];
     
     // Add title row
-    worksheetData.push(['Indian Railways - Duty Hours Report']);
+    worksheetData.push(['dutyhours.in - Duty Hours Report']);
     worksheetData.push([]); // Empty row
     
     // Add report metadata

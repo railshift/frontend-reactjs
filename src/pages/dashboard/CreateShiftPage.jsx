@@ -23,7 +23,6 @@ const CreateShiftPage = () => {
     section: '',
     
     // Combined datetime fields
-    trainArrivalDateTime: '',
     signOnDateTime: '',
     timeOfTO: '',
     departureDateTime: '',
@@ -75,12 +74,6 @@ const CreateShiftPage = () => {
         return;
       }
       
-      // Validate required time fields
-      if (!formData.trainArrivalDateTime) {
-        showError('Train arrival date-time is required!');
-        setIsSubmitting(false);
-        return;
-      }
       
       if (!formData.signOnDateTime) {
         showError('Sign-on date-time is required!');
@@ -88,21 +81,15 @@ const CreateShiftPage = () => {
         return;
       }
       
-      // Validate sign-on time is after train arrival
-      const trainArrival = dayjs(formData.trainArrivalDateTime);
+      // Validate sign-on time 
       const signOn = dayjs(formData.signOnDateTime);
       
-      if (!trainArrival.isValid() || !signOn.isValid()) {
+      if (!signOn.isValid()) {
         showError('Invalid date or time format!');
         setIsSubmitting(false);
         return;
       }
-      
-      if (signOn.isBefore(trainArrival)) {
-        showError('Sign-on date-time cannot be before train arrival date-time!');
-        setIsSubmitting(false);
-        return;
-      }
+
       
       // Validate departure time if provided
       if (formData.departureDateTime) {
@@ -138,9 +125,6 @@ const CreateShiftPage = () => {
         section: formData.section,
         
         // ISO 8601 datetime fields
-        trainArrivalDateTime: formData.trainArrivalDateTime
-          ? dayjs(formData.trainArrivalDateTime).toISOString()
-          : undefined,
         signOnDateTime: formData.signOnDateTime
           ? dayjs(formData.signOnDateTime).toISOString()
           : undefined,
@@ -194,7 +178,6 @@ const CreateShiftPage = () => {
         locomotiveNo: '',
         signOnStation: '',
         section: '',
-        trainArrivalDateTime: '',
         signOnDateTime: '',
         timeOfTO: '',
         departureDateTime: '',
@@ -291,19 +274,6 @@ const CreateShiftPage = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Train Arrival Date & Time <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="datetime-local"
-                  name="trainArrivalDateTime"
-                  value={formData.trainArrivalDateTime}
-                  onChange={handleChange}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
-                  required
-                />
-              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

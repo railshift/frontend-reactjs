@@ -129,7 +129,7 @@ const ReportsPage = () => {
     
     // ===== SHEET 1: Summary =====
     const summaryData = [
-      ['INDIAN RAILWAYS - DUTY HOURS REPORT'],
+      ['DutyHours - DUTY HOURS REPORT'],
       [],
       ['Report Information'],
       ['Report Type', filters.reportType],
@@ -146,7 +146,7 @@ const ReportsPage = () => {
       ['Relief Planned', reportData.summary.reliefPlanned],
       ['Compliance Rate', reportData.summary.complianceRate + '%'],
       [],
-      ['Note: This report is generated from the Indian Railways Shift Management System'],
+      ['Note: This report is generated from the DutyHours Shift Management System'],
     ];
     
     const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
@@ -246,7 +246,7 @@ const ReportsPage = () => {
     const worksheetData = [];
     
     // Add title row
-    worksheetData.push(['Indian Railways - Duty Hours Report']);
+    worksheetData.push(['DutyHours - Duty Hours Report']);
     worksheetData.push([]); // Empty row
     
     // Add report metadata
@@ -461,7 +461,7 @@ const ReportsPage = () => {
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
                 >
                   <option value="">All Divisions</option>
-                  <option value="central">Central Railway</option>
+                  <option value="RANCHI">RANCHI</option>
                   <option value="eastern">Eastern Railway</option>
                   <option value="northern">Northern Railway</option>
                   <option value="southern">Southern Railway</option>

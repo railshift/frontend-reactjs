@@ -152,7 +152,7 @@ const SignupPage = () => {
             <FaTrain className="text-6xl text-[#003d82]" />
           </div>
           <h1 className="text-3xl font-bold text-[#003d82] mb-2">Request Access</h1>
-          <p className="text-gray-600">Indian Railways - Shift Management</p>
+          <p className="text-gray-600">DutyHours - Shift Management</p>
           <div className="h-1 w-20 bg-[#d32f2f] mx-auto mt-3"></div>
         </div>
 
@@ -273,7 +273,7 @@ const SignupPage = () => {
                 required
               >
                 <option value="">Select Division</option>
-                <option value="CENTRAL">CENTRAL</option>
+                <option value="RANCHI">RANCHI</option>
               </select>
               {errors.division && (
                 <p className="mt-1 text-sm text-red-600">{errors.division}</p>
@@ -294,9 +294,9 @@ const SignupPage = () => {
                 required
               >
                 <option value="">Select Designation</option>
-                <option value="X">X</option>
-                <option value="Y">Y</option>
-                <option value="Z">Z</option>
+                <option value="OFFICER">OFFICER</option>
+                <option value="SUPERVISOR">SUPERVISOR</option>
+                <option value="CHASER">CHASER</option>
               </select>
               {errors.designation && (
                 <p className="mt-1 text-sm text-red-600">{errors.designation}</p>

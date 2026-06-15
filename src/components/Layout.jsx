@@ -64,7 +64,7 @@ const Layout = ({ children, fullWidth = false }) => {
             <div className="flex items-center gap-4">
               <FaTrain className="text-4xl" />
               <div>
-                <h1 className="text-2xl font-bold">Indian Railways</h1>
+                <h1 className="text-2xl font-bold">DutyHours</h1>
                 <p className="text-sm text-gray-200">Loco Pilot & Guard Shift Management System</p>
               </div>
             </div>
@@ -165,7 +165,7 @@ const Layout = ({ children, fullWidth = false }) => {
       {/* Footer */}
       <footer className="bg-[#003d82] text-white py-4 mt-auto">
         <div className="gov-container text-center">
-          <p className="text-sm">© 2025 Indian Railways. All rights reserved.</p>
+          <p className="text-sm">© 2025 DutyHours. All rights reserved.</p>
           <p className="text-xs text-gray-300 mt-1">Shift Management System v1.0</p>
         </div>
       </footer>

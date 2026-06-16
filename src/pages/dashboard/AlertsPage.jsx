@@ -208,12 +208,9 @@ useEffect(() => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
               >
                 <option value="all">All Types</option>
-                <option value="7hr">7 Hour</option>
                 <option value="8hr">8 Hour</option>
-                <option value="9hr">9 Hour</option>
                 <option value="10hr">10 Hour</option>
-                <option value="11hr">11 Hour</option>
-                <option value="14hr">14 Hour</option>
+                <option value="12hr">12 Hour</option>
               </select>
             </div>
 
@@ -253,11 +250,9 @@ useEffect(() => {
         {/* Alerts List */}
         <div className="bg-white rounded-lg shadow-md p-6">
           {fetchedAlerts.length === 0 ? (
-            <EmptyState
-              icon={<FaExclamationTriangle size={48} className="text-gray-400" />}
-              title="No Active Alerts"
-              message="There are currently no active duty hour alerts."
-            />
+            <div className='flex max-w-5xl mx-auto'> 
+            <h2 className='text-xl'>No Active Alerts</h2>
+            </div>
           ) : (
             <div className="space-y-4">
               {fetchedAlerts.map((alert) => (

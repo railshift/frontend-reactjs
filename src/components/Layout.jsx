@@ -27,9 +27,6 @@ const Layout = ({ children, fullWidth = false }) => {
     };
 
     fetchAlertCount();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchAlertCount, 30000);
-    return () => clearInterval(interval);
   }, []);
   
   const handleLogout = () => {

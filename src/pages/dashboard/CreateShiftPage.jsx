@@ -23,6 +23,7 @@ const CreateShiftPage = () => {
     section: '',
     
     // Combined datetime fields
+    trainArrivalDateTime: '',
     signOnDateTime: '',
     timeOfTO: '',
     departureDateTime: '',
@@ -128,6 +129,9 @@ const CreateShiftPage = () => {
         signOnDateTime: formData.signOnDateTime
           ? dayjs(formData.signOnDateTime).toISOString()
           : undefined,
+        trainArrivalDateTime: formData.trainArrivalDateTime
+          ? dayjs(formData.trainArrivalDateTime).toISOString()
+          : undefined,
         timeOfTO: formData.timeOfTO 
           ? dayjs(formData.timeOfTO).toISOString()
           : undefined,
@@ -179,6 +183,7 @@ const CreateShiftPage = () => {
         signOnStation: '',
         section: '',
         signOnDateTime: '',
+        trainArrivalDateTime: '',
         timeOfTO: '',
         departureDateTime: '',
         locoPilotName: '',
@@ -288,6 +293,19 @@ const CreateShiftPage = () => {
                   required
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Train Arrival Date & Time <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  name="trainArrivalDateTime"
+                  value={formData.trainArrivalDateTime}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
+                  required
+                />
+              </div>             
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

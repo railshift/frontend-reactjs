@@ -22,10 +22,9 @@ const EditShiftPage = () => {
     dutyType: '',
     section: '',
     signOnStation: '',
-    signOnTime: '',
-    trainArrivalDate: '',
-    departureTime: '',
-    trainArrivalTime: '',
+    signOnDateTime: '',
+    trainArrivalDateTime: '',
+    departureDateTime: '',
     timeOfTO: '',
     reliefPlanned: false,
     reliefTime: '',
@@ -57,10 +56,9 @@ const EditShiftPage = () => {
             dutyType: shift.dutyType || '',
             section: shift.section || '',
             signOnStation: shift.signOnStation || '',
-            signOnTime: shift.signOnDateTime ? dayjs(shift.signOnDateTime).format('YYYY-MM-DDTHH:mm') : '',
-            trainArrivalDate: shift.trainArrivalDate ? dayjs(shift.trainArrivalDate).format('YYYY-MM-DD') : '',
-            departureTime: shift.departureDateTime ? dayjs(shift.departureDateTime).format('YYYY-MM-DDTHH:mm') : '',
-            trainArrivalTime: shift.trainArrivalDateTime ? dayjs(shift.trainArrivalDateTime).format('YYYY-MM-DDTHH:mm') : '',
+            signOnDateTime: shift.signOnDateTime ? dayjs(shift.signOnDateTime).format('YYYY-MM-DDTHH:mm') : '',
+            trainArrivalDateTime: shift.trainArrivalDateTime ? dayjs(shift.trainArrivalDateTime).format('YYYY-MM-DDTHH:mm') : '',
+            departureDateTime: shift.departureDateTime ? dayjs(shift.departureDateTime).format('YYYY-MM-DDTHH:mm') : '',
             timeOfTO: shift.timeOfTO ? dayjs(shift.timeOfTO).format('YYYY-MM-DDTHH:mm') : '',
             reliefPlanned: shift.reliefPlanned || false,
             reliefTime: shift.reliefTime ? dayjs(shift.reliefTime).format('YYYY-MM-DDTHH:mm') : '',
@@ -120,10 +118,9 @@ const EditShiftPage = () => {
         dutyType: formData.dutyType,
         section: formData.section,
         signOnStation: formData.signOnStation,
-        signOnDateTime: dayjs(formData.signOnTime).toISOString(), // Backend uses signOnDateTime
-        trainArrivalDate: dayjs(formData.trainArrivalDate).toISOString(),
-        departureDateTime: formData.departureTime ? dayjs(formData.departureTime).toISOString() : null, // Backend uses departureDateTime
-        trainArrivalDateTime: formData.trainArrivalTime ? dayjs(formData.trainArrivalTime).toISOString() : null, // Backend uses trainArrivalDateTime
+        signOnDateTime: dayjs(formData.signOnDateTime).toISOString(), // Backend uses signOnDateTime
+        trainArrivalDateTime: dayjs(formData.trainArrivalDateTime).toISOString(),
+        departureDateTime: formData.departureDateTime ? dayjs(formData.departureDateTime).toISOString() : null, // Backend uses departureDateTime
         timeOfTO: formData.timeOfTO ? dayjs(formData.timeOfTO).toISOString() : null,
         reliefPlanned: formData.reliefPlanned,
         reliefTime: formData.reliefTime ? dayjs(formData.reliefTime).toISOString() : null,
@@ -204,14 +201,13 @@ const EditShiftPage = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Train Name <span className="text-red-500">*</span>
+                  Train Name <span className="text-green-400">(optional)</span>
                 </label>
                 <input
                   type="text"
                   name="trainName"
                   value={formData.trainName}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
                 />
               </div>
@@ -233,13 +229,12 @@ const EditShiftPage = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Duty Type <span className="text-red-500">*</span>
+                  Duty Type <span className="text-green-400">(optional)</span>
                 </label>
                 <select
                   name="dutyType"
                   value={formData.dutyType}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
                 >
                   <option value="">Select Duty Type</option>
@@ -289,12 +284,12 @@ const EditShiftPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Train Arrival Date <span className="text-red-500">*</span>
+                  Train Arrival Date Time <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="date"
-                  name="trainArrivalDate"
-                  value={formData.trainArrivalDate}
+                  type="datetime-local"
+                  name="trainArrivalDateTime"
+                  value={formData.trainArrivalDateTime}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
@@ -303,12 +298,12 @@ const EditShiftPage = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Sign-On Time <span className="text-red-500">*</span>
+                  Sign-On Date Time <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="datetime-local"
-                  name="signOnTime"
-                  value={formData.signOnTime}
+                  name="signOnDateTime"
+                  value={formData.signOnDateTime}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
@@ -317,29 +312,16 @@ const EditShiftPage = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Departure Time
+                  Departure Date Time
                 </label>
                 <input
                   type="datetime-local"
-                  name="departureTime"
-                  value={formData.departureTime}
+                  name="departureDateTime"
+                  value={formData.departureDateTime}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Train Arrival Time
-                </label>
-                <input
-                  type="datetime-local"
-                  name="trainArrivalTime"
-                  value={formData.trainArrivalTime}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
-                />
-              </div>
+              </div>  
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">

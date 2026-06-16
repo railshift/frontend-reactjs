@@ -22,7 +22,13 @@ const ActiveShiftsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [shifts, setShifts] = useState([]);
   const [activeShifts, setActiveShifts] = useState([]);
-  
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [completeFormData, setCompleteFormData] = useState({
+    signOffDateTime: '',
+    signOffStation: '',
+  });
+  const [dutyHours, setDutyHours] = useState({ hours: 0, minutes: 0, totalHours: 0 });
+  const [shift, setShift] = useState(null);
   const canEdit = useAuthStore((state) => state.canEdit);
   const { success, warning, info } = useToastStore();
 
@@ -158,30 +164,52 @@ const ActiveShiftsPage = () => {
     setSelectedShift(null);
   };
 
-  const handleReleaseShift = async (shiftId) => {
-    const shift = activeShifts.find(s => s.id === shiftId);
-    if (!shift) return;
+
+  const handleComplete = (shift) => {
+      setShift(shift);
+       const dutyHours = shift.status === 'IN_PROGRESS' 
+    ? calculateDutyHours(shift.signOnTime)
+    : { hours: 0, minutes: 0, totalHours: shift.dutyHours || 0 };
+    // Set default values
+    setDutyHours(dutyHours);
+    setCompleteFormData({
+      signOffDateTime: dayjs().format('YYYY-MM-DDTHH:mm'),
+      signOffStation: shift.signOnStation || '',
+    });
+    setShowCompleteModal(true);
+  };
+
+  const handleCompleteSubmit = async (e) => {
+    e.preventDefault();
     
-    const dutyHours = calculateDutyHours(shift.signOnTime);
-    
-    if (window.confirm(`Release shift for Train ${shift.trainNumber}?\n\nLoco Pilot: ${shift.locoPilot.name}\nDuty Hours: ${dutyHours.hours}h ${dutyHours.minutes}m`)) {
-      try {
-        // Release shift via API - mark as completed
-        await shiftService.updateShift(shiftId, {
-          status: 'COMPLETED',
-          completedAt: dayjs().toISOString()
-        });
-        
-        // Remove from active shifts
-        setActiveShifts(prevShifts => prevShifts.filter(s => s.id !== shiftId));
-        
-        success(`Shift released! Final Hours: ${dutyHours.hours}h ${dutyHours.minutes}m`);
-      } catch (error) {
-        console.error('Error releasing shift:', error);
-        warning('Failed to release shift');
+    try {
+      // Convert to ISO format - backend expects signOffDateTime (combined)
+      const signOffData = {
+        signOffDateTime: dayjs(completeFormData.signOffDateTime).toISOString(),
+        signOffStation: completeFormData.signOffStation,
+        status: 'COMPLETED', // Mark shift as completed
+      };
+
+      console.log(' Completing shift with data:', signOffData);
+
+      const response = await shiftService.updateShift(shift.id, signOffData);
+      
+      if (response.success) {
+        success('Shift completed successfully');
+        setShift({ ...shift, status: 'COMPLETED', ...response.data });
+        setShowCompleteModal(false);
       }
+    } catch (err) {
+      console.error(' Failed to complete shift:', err);
+      showError(err.response?.data?.message || 'Failed to complete shift');
     }
   };
+
+  const handleCompleteModalClose = () => {
+    setShowCompleteModal(false);
+  };
+
+ 
 
   return (
     <Layout>
@@ -369,7 +397,9 @@ const ActiveShiftsPage = () => {
                           )}
                           {canEdit() && (
                             <button
-                              onClick={() => handleReleaseShift(shift.id)}
+                              onClick={() => {{
+                                handleComplete(shift);
+                              }}}
                               className="px-4 py-2 bg-[#003d82] text-white rounded-md hover:bg-[#002b5c] transition-colors text-sm font-medium"
                             >
                               Release Shift
@@ -385,7 +415,7 @@ const ActiveShiftsPage = () => {
           )}
         </div>
         </div>
-      </ErrorBoundary>
+
 
       {/* Relief Planning Modal */}
       {showReliefModal && selectedShift && (
@@ -432,6 +462,107 @@ const ActiveShiftsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Complete Shift Modal */}
+              {/* Complete Shift Modal */}
+              {showCompleteModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                    {/* Modal Header */}
+                    <div className="bg-[#003d82] text-white px-6 py-4 rounded-t-lg">
+                      <h3 className="text-xl font-bold flex items-center gap-2">
+                        <FaCheckCircle /> Complete Shift
+                      </h3>
+                      <p className="text-sm opacity-90 mt-1">
+                        Enter sign-off details for Train #{shift.trainNumber}
+                      </p>
+                    </div>
+      
+                    {/* Modal Body */}
+                    <form onSubmit={handleCompleteSubmit} className="p-6 space-y-4">
+                      {/* Sign-Off Date & Time */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Sign-Off Date & Time <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={completeFormData.signOffDateTime}
+                          onChange={(e) =>
+                            setCompleteFormData({ ...completeFormData, signOffDateTime: e.target.value })
+                          }
+                          required
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Select the date and time when the crew signed off
+                        </p>
+                      </div>
+      
+                      {/* Sign-Off Station */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Sign-Off Station <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={completeFormData.signOffStation}
+                          onChange={(e) =>
+                            setCompleteFormData({ ...completeFormData, signOffStation: e.target.value })
+                          }
+                          placeholder="Enter station name"
+                          required
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#003d82] focus:border-transparent"
+                        />
+                      </div>
+      
+                      {/* Duty Hours Summary */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                        <p className="text-sm font-semibold text-gray-700 mb-2">Duty Hours Summary</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Sign On:</span>
+                          <span className="font-semibold text-gray-800">
+                            {dayjs(shift.signOnTime).format('DD MMM, HH:mm')}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-sm text-gray-600">Total Duty Hours:</span>
+                          <span className="font-bold text-[#003d82] text-lg">
+                            {dutyHours.hours}h {dutyHours.minutes}m
+                          </span>
+                        </div>
+                      </div>
+      
+                      {/* Action Buttons */}
+                      <div className="flex gap-3 pt-4">
+                        <button
+                          type="button"
+                          onClick={handleCompleteModalClose}
+                          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2"
+                        >
+                          <FaCheckCircle /> Complete Shift
+                        </button>
+                      </div>
+      
+                      {/* Warning Note */}
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                        <p className="text-xs text-yellow-800">
+                          <strong>Note:</strong> This action will mark the shift as completed and cannot be undone. 
+                          Ensure all details are correct before proceeding.
+                        </p>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+      </ErrorBoundary>
     </Layout>
   );
 };

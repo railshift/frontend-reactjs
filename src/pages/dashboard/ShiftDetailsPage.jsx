@@ -159,7 +159,7 @@ const ShiftDetailsPage = () => {
         status: 'COMPLETED', // Mark shift as completed
       };
 
-      console.log('📤 Completing shift with data:', signOffData);
+      console.log(' Completing shift with data:', signOffData);
 
       const response = await shiftService.updateShift(id, signOffData);
       
@@ -169,7 +169,7 @@ const ShiftDetailsPage = () => {
         setShowCompleteModal(false);
       }
     } catch (err) {
-      console.error('❌ Failed to complete shift:', err);
+      console.error(' Failed to complete shift:', err);
       showError(err.response?.data?.message || 'Failed to complete shift');
     }
   };

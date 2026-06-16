@@ -10,6 +10,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import useAuthStore from '../../stores/useAuthStore';
 import useToastStore from '../../stores/useToastStore';
 import shiftService from '../../services/shiftService';
+import {useQuery} from '@tanstack/react-query'
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
@@ -27,10 +28,15 @@ const ActiveShiftsPage = () => {
     signOffDateTime: '',
     signOffStation: '',
   });
+
+
   const [dutyHours, setDutyHours] = useState({ hours: 0, minutes: 0, totalHours: 0 });
   const [shift, setShift] = useState(null);
   const canEdit = useAuthStore((state) => state.canEdit);
   const { success, warning, info } = useToastStore();
+
+  // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
 
   // Utility function to calculate duty hours
   const calculateDutyHours = (signOnTime) => {
@@ -48,24 +54,17 @@ const ActiveShiftsPage = () => {
     };
   };
 
-  // Fetch shifts from API
-  useEffect(() => {
-    const fetchShifts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await shiftService.getAllShifts({ status: 'IN_PROGRESS' });
-        
-        if (response.success && response.data) {
-          // Transform API data to match frontend format
-          const transformedShifts = response.data.map(shift => {
-            console.log('Raw shift data:', {
-              id: shift.id,
-              trainNumber: shift.trainNumber,
-              signOnDateTime: shift.signOnDateTime,
-              departureDateTime: shift.departureDateTime,
-              trainArrivalDateTime: shift.trainArrivalDateTime,
-            });
+  // Fetching shifts with react query
+  const {
+    data: activeShiftsData, 
+    isLoading: isActiveShiftsLoading, 
+    refetch: refetchActiveShifts} = useQuery({
+    queryKey: ['activeShifts', 'pagination', currentPage],
+    queryFn: () => shiftService.getAllShifts({ status: 'IN_PROGRESS', page: currentPage, limit: 20 }),
+    keepPreviousData: true,
+    });
 
+    const allActiveShifts = activeShiftsData?.data?.map(shift => {
             return {
               id: shift.id,
               trainNumber: shift.trainNumber,
@@ -94,20 +93,7 @@ const ActiveShiftsPage = () => {
               notifications: [],
             };
           });
-          
-          setShifts(transformedShifts);
-          setActiveShifts(transformedShifts);
-        }
-      } catch (error) {
-        console.error('Failed to fetch shifts:', error);
-        warning('Failed to load shifts. Please refresh the page.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchShifts();
-  }, [setActiveShifts, warning]);
+    const shiftPagination = activeShiftsData?.pagination || { page: 1, pages: 1, total: 0 };
 
   // Update current time every second for live tracking
   useEffect(() => {
@@ -239,7 +225,7 @@ const ActiveShiftsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500">
             <p className="text-sm text-gray-600">Total Active</p>
-            <p className="text-3xl font-bold text-gray-800">{activeShifts.length}</p>
+            <p className="text-3xl font-bold text-gray-800">{shiftPagination.total}</p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-yellow-500">
             <p className="text-sm text-gray-600">Alerts (8+ hrs)</p>
@@ -263,12 +249,12 @@ const ActiveShiftsPage = () => {
 
         {/* Active Shifts List */}
         <div className="space-y-4">
-          {isLoading ? (
+          {isActiveShiftsLoading ? (
             <div className="bg-white rounded-lg shadow-md p-8 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#003d82] mx-auto mb-4"></div>
               <p className="text-gray-600">Loading shifts...</p>
             </div>
-          ) : activeShifts.length === 0 ? (
+          ) : activeShiftsData.data.length === 0 ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <EmptyState
                 icon={FaTrain}
@@ -279,7 +265,7 @@ const ActiveShiftsPage = () => {
               />
             </div>
           ) : (
-            activeShifts.map((shift) => {
+            allActiveShifts.map((shift) => {
               const dutyHours = calculateDutyHours(shift.signOnTime);
               const alert = getAlertLevelDisplay(dutyHours.totalHours);
               
@@ -416,7 +402,28 @@ const ActiveShiftsPage = () => {
         </div>
         </div>
 
-
+        {/* Pagination */}
+        <div className="flex justify-center gap-2 my-4 ">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={shiftPagination.page === 1}
+            className="px-4 py-2 bg-[#003d82] text-white rounded-md hover:bg-[#002b5c] transition-colors disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-gray-700">
+            Page {shiftPagination.page} of {shiftPagination.pages}
+          </span>
+          <button
+            onClick={() => {{
+              setCurrentPage((prev) => Math.min(prev + 1, shiftPagination.pages));
+            }}}
+            disabled={shiftPagination.page === shiftPagination.pages}
+            className="px-4 py-2 bg-[#003d82] text-white rounded-md hover:bg-[#002b5c] transition-colors disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       {/* Relief Planning Modal */}
       {showReliefModal && selectedShift && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -464,7 +471,6 @@ const ActiveShiftsPage = () => {
       )}
 
       {/* Complete Shift Modal */}
-              {/* Complete Shift Modal */}
               {showCompleteModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                   <div className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">

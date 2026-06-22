@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaTrain, FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import useAuthStore from '../../stores/useAuthStore';
+import { setupNotifications } from '../../services/notificationService';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ const LoginPage = () => {
       });
 
       if (result.success) {
+        // ask for notification permission and register token
+        await setupNotifications();
         // Navigate to dashboard on success
         navigate('/dashboard');
       } else {

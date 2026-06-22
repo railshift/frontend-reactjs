@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
-import useDataCache from '../../hooks/useDataCache';
 import { 
   FaUsers, 
   FaTrain, 
@@ -31,43 +30,42 @@ const HomeDashboard = () => {
   // State
   const [dashboardStats, setDashboardStats] = useState(null);
   const [recentActivities, setRecentActivities] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch dashboard data with intelligent caching
-  const { 
-    data: cachedStats, 
-    isLoading: statsLoading, 
-    error: statsError 
-  } = useDataCache(
-    () => dashboardService.getStats(),
-    [],
-    10 * 60 * 1000 // Cache for 10 minutes
-  );
-
-  const { 
-    data: cachedActivities, 
-    isLoading: activitiesLoading, 
-    error: activitiesError 
-  } = useDataCache(
-    () => dashboardService.getRecentActivities({ limit: 10 }),
-    [],
-    5 * 60 * 1000 // Cache for 5 minutes
-  );
-
-  const isLoading = statsLoading && !dashboardStats;
-  const error = statsError || activitiesError;
-
-  // Update state when cached data arrives
+  // Fetch dashboard data
   useEffect(() => {
-    if (cachedStats?.success) {
-      setDashboardStats(cachedStats.data);
-    }
-  }, [cachedStats]);
+    let isMounted = true;
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const [statsData, activitiesData] = await Promise.all([
+          dashboardService.getStats(),
+          dashboardService.getRecentActivities()
+        ]);
+        if (isMounted) {
+          setDashboardStats(statsData);
+          setRecentActivities(activitiesData || []);
+        }
+      } catch (err) {
+        if (isMounted) {
+          const errMsg = err.response?.data?.message || err.message || 'Failed to fetch dashboard data';
+          setError(errMsg);
+          showError(errMsg);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-  useEffect(() => {
-    if (cachedActivities?.success) {
-      setRecentActivities(cachedActivities.data.activities || []);
-    }
-  }, [cachedActivities]);
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
+  }, [showError]);
 
   // Activity type display helpers
   const getActivityIcon = (type) => {
@@ -120,10 +118,20 @@ const HomeDashboard = () => {
     );
   }
 
-  const stats = dashboardStats || {};
+  const stats = dashboardStats?.data || dashboardStats || {};
   const overview = stats.overview || {};
   const today = stats.today || {};
   const alerts = stats.alerts || {};
+
+  const activities = Array.isArray(recentActivities)
+    ? recentActivities
+    : (Array.isArray(recentActivities?.data?.activities)
+        ? recentActivities.data.activities
+        : (Array.isArray(recentActivities?.activities)
+            ? recentActivities.activities
+            : (Array.isArray(recentActivities?.data)
+                ? recentActivities.data
+                : [])));
 
   return (
     <Layout>
@@ -290,10 +298,10 @@ const HomeDashboard = () => {
             </button>
           </div>
           <div className="space-y-3">
-            {recentActivities.length === 0 ? (
+            {activities.length === 0 ? (
               <p className="text-gray-500 text-center py-6">No recent activities</p>
             ) : (
-              recentActivities.slice(0, 5).map((activity) => {
+              activities.slice(0, 5).map((activity) => {
                 const ActivityIcon = getActivityIcon(activity.type);
                 const badge = getActivityBadge(activity.type);
                 

@@ -15,8 +15,28 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ToastContainer from './components/ToastContainer';
 import useAuthStore from './stores/useAuthStore';
 
+// firebase messaging
+import { onMessage } from 'firebase/messaging';
+import { messaging } from './lib/firebaseMessaging';
+
 function App() {
   const { isAuthenticated } = useAuthStore();
+
+  onMessage(messaging, (payload) => {
+
+  console.log(
+    'Foreground notification:',
+    payload
+  );
+
+  new Notification(
+    payload.notification.title,
+    {
+      body:
+        payload.notification.body,
+    }
+  );
+});
 
   return (
     <Router>

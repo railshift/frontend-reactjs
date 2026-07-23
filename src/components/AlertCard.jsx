@@ -4,24 +4,30 @@ import { Clock, AlertTriangle, CheckCircle, Train } from 'lucide-react'; // Opti
 // Helper to style components based on severity/type
 const getSeverityStyles = (type) => {
   switch (type) {
+    case 'DUTY_14HR':
     case 'DUTY_12HR':
       return {
-        bg: 'bg-red-50 border-red-200 hover:border-red-300',
-        badge: 'bg-red-100 text-red-800 border-red-200',
-        iconColor: 'text-red-600'
+        card: 'bg-white border-l-4 border-l-red-500 border-y border-r border-slate-200 hover:shadow-md',
+        badge: 'bg-red-50 text-red-700 border-red-100',
+        iconBg: 'bg-red-50',
+        iconColor: 'text-red-500'
       };
+    case 'DUTY_11HR':
     case 'DUTY_10HR':
       return {
-        bg: 'bg-amber-50 border-amber-200 hover:border-amber-300',
-        badge: 'bg-amber-100 text-amber-800 border-amber-200',
-        iconColor: 'text-amber-600'
+        card: 'bg-white border-l-4 border-l-amber-500 border-y border-r border-slate-200 hover:shadow-md',
+        badge: 'bg-amber-50 text-amber-700 border-amber-100',
+        iconBg: 'bg-amber-50',
+        iconColor: 'text-amber-500'
       };
+    case 'DUTY_9HR':
     case 'DUTY_8HR':
     default:
       return {
-        bg: 'bg-blue-50 border-blue-200 hover:border-blue-300',
-        badge: 'bg-blue-100 text-blue-800 border-blue-200',
-        iconColor: 'text-blue-600'
+        card: 'bg-white border-l-4 border-l-blue-500 border-y border-r border-slate-200 hover:shadow-md',
+        badge: 'bg-blue-50 text-blue-700 border-blue-100',
+        iconBg: 'bg-blue-50',
+        iconColor: 'text-blue-500'
       };
   }
 };
@@ -32,81 +38,41 @@ export const AlertCard = ({ alert }) => {
   const formattedDate = new Date(alert.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
 
   return (
-    <div className={`p-4 rounded-xl border transition-all duration-200 shadow-sm ${styles.bg}`}>
-      <div className="flex items-start justify-between gap-4">
+    <div className={`flex flex-col p-4 rounded-r-xl rounded-l-md transition-all duration-200 shadow-sm ${styles.card}`}>
+      <div className="flex gap-3 w-full mb-3">
         {/* Left: Icon and Core Text */}
-        <div className="flex gap-3">
-          <div className={`p-2 rounded-lg bg-white mt-0.5 shadow-sm ${styles.iconColor}`}>
-            <AlertTriangle size={20} />
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+        <div className={`p-2 rounded-full mt-0.5 shrink-0 h-fit ${styles.iconBg} ${styles.iconColor}`}>
+          <AlertTriangle size={18} strokeWidth={2.5} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <h4 className="text-sm font-bold text-slate-800">
               {alert.title}
-              <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${styles.badge}`}>
-                {alert.status}
-              </span>
             </h4>
-            <p className="text-xs text-slate-600 mt-1 font-medium leading-relaxed">
-              {alert.message}
-            </p>
-            
-            {/* Meta tags (Train details) */}
-            {alert.shift?.trainNumber && (
-              <div className="flex items-center gap-3 mt-3 text-[11px] font-medium text-slate-500">
-                <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200">
-                  <Train size={12} className="text-slate-400" />
-                  Train: {alert.shift.trainNumber}
-                </span>
-                <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200">
-                  <Clock size={12} className="text-slate-400" />
-                  Triggered: {formattedDate}, {formattedTime}
-                </span>
-              </div>
-            )}
+            <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold border ${styles.badge}`}>
+              {alert.status}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
+            <span className="flex items-center w-full gap-1.5 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+              <Clock size={12} className="text-slate-400 shrink-0" />
+              <span className="truncate">{formattedDate}, {formattedTime}</span>
+            </span>
           </div>
         </div>
+      </div>
 
-        {/* Right: Action Button */}
+      {/* Action Button */}
+      {alert.status === 'PENDING' && (
         <button 
-          onClick={() => alert('Acknowledge handler here')}
-          className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 bg-white text-slate-700 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors whitespace-nowrap"
+          onClick={() => window.alert('Acknowledge handler here')}
+          className="mt-2 w-full flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-colors whitespace-nowrap"
         >
-          <CheckCircle size={14} className="text-emerald-600" />
+          <CheckCircle size={14} />
           Acknowledge
         </button>
-      </div>
+      )}
     </div>
   );
 };
-
-export default function AlertsDashboard() {
-  // Replace mockAlertsData with your actual state/props fetched from the API
-  const alerts = mockAlertsData; 
-
-  return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
-      <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
-        <div>
-          <h2 className="text-lg font-bold text-slate-900">Active Duty Alerts</h2>
-          <p className="text-xs text-slate-500">Real-time shift management notifications</p>
-        </div>
-        <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full">
-          {alerts.length} New
-        </span>
-      </div>
-
-      {/* The Map implementation */}
-      <div className="space-y-3">
-        {alerts.length > 0 ? (
-          alerts.map((alert) => (
-            <AlertCard key={alert.id} alert={alert} />
-          ))
-        ) : (
-          <div className="text-center py-8 text-sm text-slate-400">
-            No pending alerts found.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}

@@ -53,106 +53,108 @@ const Layout = ({ children, fullWidth = false }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-[#003d82] text-white shadow-md">
-        <div className="gov-container">
-          <div className="flex items-center justify-between py-4">
-            {/* Logo and Title */}
-            <div className="flex items-center gap-4">
-              <FaTrain className="text-4xl" />
-              <div>
-                <h1 className="text-2xl font-bold">DutyHours</h1>
-                <p className="text-sm text-gray-200">Loco Pilot & Guard Shift Management System</p>
+      <div className="sticky top-0 z-50 w-full">
+        {/* Header */}
+        <header className="bg-[#003d82] text-white shadow-md">
+          <div className="gov-container">
+            <div className="flex items-center justify-between py-4">
+              {/* Logo and Title */}
+              <div className="flex items-center gap-4">
+                <FaTrain className="text-4xl" />
+                <div>
+                  <h1 className="text-2xl font-bold">DutyHours</h1>
+                  <p className="text-sm text-gray-200">Loco Pilot & Guard Shift Management System</p>
+                </div>
               </div>
-            </div>
-            
-            {/* User Info */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-lg">
-                <div className="flex items-center gap-2">
-                  {getRoleIcon()}
-                  <div>
-                    <p className="text-sm font-semibold">{user?.name || 'User'}</p>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs px-2 py-0.5 rounded ${getRoleBadge()}`}>
-                        {role?.toUpperCase()}
-                      </span>
-                      {user?.division && (
-                        <span className="text-xs text-gray-300">{user.division}</span>
-                      )}
+              
+              {/* User Info */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    {getRoleIcon()}
+                    <div>
+                      <p className="text-sm font-semibold">{user?.name || 'User'}</p>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs px-2 py-0.5 rounded ${getRoleBadge()}`}>
+                          {role?.toUpperCase()}
+                        </span>
+                        {user?.division && (
+                          <span className="text-xs text-gray-300">{user.division}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 bg-[#d32f2f] hover:bg-[#b71c1c] px-4 py-2 rounded transition-colors"
+                >
+                  <FaSignOutAlt />
+                  <span>Logout</span>
+                </button>
               </div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 bg-[#d32f2f] hover:bg-[#b71c1c] px-4 py-2 rounded transition-colors"
-              >
-                <FaSignOutAlt />
-                <span>Logout</span>
-              </button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Navigation Bar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="gov-container">
-          <ul className="flex gap-1">
-            <li>
-              <Link
-                to="/dashboard"
-                className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors"
-              >
-                Dashboard
-              </Link>
-            </li>
-            {canEdit() && (
+        {/* Navigation Bar */}
+        <nav className="bg-white shadow-sm border-b border-gray-200">
+          <div className="gov-container">
+            <ul className="flex gap-1">
               <li>
                 <Link
-                  to="/dashboard/create-shift"
+                  to="/dashboard"
                   className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors"
                 >
-                  Create Shift
+                  Dashboard
                 </Link>
               </li>
-            )}
-            <li>
-              <Link
-                to="/dashboard/active-shifts"
-                className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors"
-              >
-                Active Shifts
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/alerts"
-                className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors relative"
-              >
-                <span className="flex items-center gap-2">
-                  <FaBell />
-                  Alerts
-                  {alertCount > 0 && (
-                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {alertCount}
-                    </span>
-                  )}
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/completed-shifts"
-                className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors"
-              >
-                Completed Shifts
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </nav>
+              {canEdit() && (
+                <li>
+                  <Link
+                    to="/dashboard/create-shift"
+                    className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors"
+                  >
+                    Create Shift
+                  </Link>
+                </li>
+              )}
+              <li>
+                <Link
+                  to="/dashboard/active-shifts"
+                  className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors"
+                >
+                  Active Shifts
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/dashboard/alerts"
+                  className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors relative"
+                >
+                  <span className="flex items-center gap-2">
+                    <FaBell />
+                    Alerts
+                    {alertCount > 0 && (
+                      <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                        {alertCount}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/dashboard/completed-shifts"
+                  className="block px-6 py-3 text-[#003d82] hover:bg-gray-100 font-medium transition-colors"
+                >
+                  Completed Shifts
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
 
       {/* Main Content */}
       <main className={`flex-1 py-6 ${fullWidth ? 'px-6 max-w-full' : 'gov-container'}`}>

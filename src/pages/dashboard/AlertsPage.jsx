@@ -12,7 +12,9 @@ import {
   FaCheckCircle,
   FaFilter,
   FaSort,
-  FaClock
+  FaClock,
+  FaThLarge,
+  FaList
 } from 'react-icons/fa';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -41,7 +43,8 @@ const AlertPage = () => {
   const [filterType, setFilterType] = useState('all'); // all, 7hr, 8hr, 9hr, 10hr, 11hr, 14hr
   const [filterStatus, setFilterStatus] = useState('all'); // all, pending, responded
   const [sortBy, setSortBy] = useState('dutyHours'); // dutyHours, time
-  
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   // Filter alerts based on selected filters
 
@@ -118,6 +121,47 @@ useEffect(() => {
   }
 }, [fetchedAlerts]);
 
+  // Group alerts logic
+  const processedAlerts = Array.isArray(fetchedAlerts) ? fetchedAlerts : [];
+  
+  // 1. Filter alerts
+  const filteredAlerts = processedAlerts.filter(alert => {
+    // Type filter
+    if (filterType !== 'all') {
+      const typeStr = filterType.toUpperCase(); // e.g., '8HR'
+      // alert.type is like 'DUTY_8HR'
+      if (!alert.type.includes(typeStr)) return false;
+    }
+    // Status filter
+    if (filterStatus !== 'all') {
+      if (filterStatus === 'pending' && alert.status !== 'PENDING') return false;
+      if (filterStatus === 'responded' && alert.status === 'PENDING') return false;
+    }
+    return true;
+  });
+
+  // 2. Group by shiftId
+  const activeShiftGroups = {};
+  const completedShiftGroups = {};
+
+  filteredAlerts.forEach(alert => {
+    const shift = alert.shift;
+    if (!shift) return;
+    const isCompleted = shift.status === 'COMPLETED';
+    const targetGroup = isCompleted ? completedShiftGroups : activeShiftGroups;
+
+    if (!targetGroup[shift.id]) {
+      targetGroup[shift.id] = {
+        shift: shift,
+        alerts: []
+      };
+    }
+    targetGroup[shift.id].alerts.push(alert);
+  });
+
+  const activeGroupsArray = Object.values(activeShiftGroups);
+  const completedGroupsArray = Object.values(completedShiftGroups);
+
   // Loading state
   if (isPending) {
     return (
@@ -157,14 +201,40 @@ useEffect(() => {
                 </p>
               </div>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="px-6 py-2 bg-[#003d82] text-white rounded-lg hover:bg-[#002b5c] transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              <FaFilter size={16} />
-              Refresh
-            </button>
+            <div className="flex gap-2">
+              <div className="flex bg-gray-100 rounded-lg p-1 border border-gray-200">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded flex items-center justify-center transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'bg-white shadow-sm text-[#003d82]' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  title="Grid View"
+                >
+                  <FaThLarge />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded flex items-center justify-center transition-colors ${
+                    viewMode === 'list' 
+                      ? 'bg-white shadow-sm text-[#003d82]' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  title="List View"
+                >
+                  <FaList />
+                </button>
+              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="px-6 py-2 bg-[#003d82] text-white rounded-lg hover:bg-[#002b5c] transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <FaFilter size={16} />
+                Refresh
+              </button>
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -249,17 +319,83 @@ useEffect(() => {
 
         {/* Alerts List */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          {fetchedAlerts.length === 0 ? (
+          <div className="flex items-center justify-between mb-6 border-b pb-4">
+            <h2 className="text-xl font-bold text-gray-800">Active Shifts Alerts</h2>
+            <span className="bg-[#003d82] text-white text-xs font-bold px-3 py-1 rounded-full">
+              {activeGroupsArray.length} Shift{activeGroupsArray.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          
+          {activeGroupsArray.length === 0 ? (
             <div className='flex max-w-5xl mx-auto'> 
-            <h2 className='text-xl'>No Active Alerts</h2>
+              <p className='text-gray-500 py-8 text-center w-full'>No active alerts found for active shifts.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {fetchedAlerts.map((alert) => (
-                <AlertCard key={alert.id} alert={alert} />
+            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-6"}>
+              {activeGroupsArray.map((group) => (
+                <div key={group.shift.id} className="border-2 border-[#003d82] rounded-lg overflow-hidden shadow-md flex flex-col h-full bg-white">
+                  <div className="bg-[#003d82] px-5 py-4 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white p-2 rounded text-[#003d82]">
+                        <FaTrain />
+                      </div>
+                      <span className="font-bold text-white text-lg tracking-wide">Train: {group.shift.trainNumber}</span>
+                    </div>
+                    <span className="text-sm font-bold bg-white text-[#003d82] px-3 py-1 rounded-full shadow-sm">
+                      {group.alerts.length} Alert{group.alerts.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="p-5 space-y-4 flex-1">
+                    {group.alerts.map(alert => (
+                      <AlertCard key={alert.id} alert={alert} />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}
+
+          {/* Toggle for completed shifts */}
+          <div className="mt-10 pt-6 border-t border-gray-200">
+            <button 
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="text-[#003d82] hover:text-[#002b5c] font-semibold flex items-center gap-2 transition-colors"
+            >
+              {showCompleted ? 'Hide Completed Shifts' : 'Show Completed Shifts'} 
+              <span className="bg-gray-100 border border-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">
+                {completedGroupsArray.length}
+              </span>
+            </button>
+            
+            {showCompleted && (
+              <div className={`mt-6 ${viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-6"}`}>
+                {completedGroupsArray.length === 0 ? (
+                  <p className="text-gray-500 py-4 text-center">No alerts found for completed shifts.</p>
+                ) : (
+                  completedGroupsArray.map((group) => (
+                    <div key={group.shift.id} className="border-2 border-gray-400 rounded-lg overflow-hidden opacity-80 hover:opacity-100 transition-opacity shadow-md flex flex-col h-full bg-white">
+                      <div className="bg-gray-600 px-5 py-4 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-white p-2 rounded text-gray-600">
+                            <FaTrain />
+                          </div>
+                          <span className="font-bold text-white text-lg tracking-wide">Train: {group.shift.trainNumber}</span>
+                        </div>
+                        <span className="text-sm font-bold bg-white text-gray-700 px-3 py-1 rounded-full shadow-sm">
+                          COMPLETED
+                        </span>
+                      </div>
+                      <div className="p-5 space-y-4 flex-1">
+                        {group.alerts.map(alert => (
+                          <AlertCard key={alert.id} alert={alert} />
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Layout>

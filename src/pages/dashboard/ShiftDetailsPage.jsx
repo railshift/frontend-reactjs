@@ -46,10 +46,10 @@ const ShiftDetailsPage = () => {
   const { success, error: showError } = useToastStore();
 
   // Utility function to calculate duty hours
-  const calculateDutyHours = (signOnTime) => {
+  const calculateDutyHours = (signOnTime, endTime = currentTime) => {
     const signOn = dayjs(signOnTime);
-    const now = currentTime;
-    const diff = now.diff(signOn);
+    const end = dayjs(endTime);
+    const diff = end.diff(signOn);
     const totalHours = Math.floor(diff / (1000 * 60 * 60));
     const totalMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     
@@ -675,7 +675,12 @@ const ShiftDetailsPage = () => {
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-sm text-gray-600">Total Duty Hours:</span>
                     <span className="font-bold text-[#003d82] text-lg">
-                      {dutyHours.hours}h {dutyHours.minutes}m
+                      {(() => {
+                        const calculatedHours = shift.status === 'IN_PROGRESS' && completeFormData.signOffDateTime
+                          ? calculateDutyHours(shift.signOnTime, completeFormData.signOffDateTime)
+                          : dutyHours;
+                        return `${calculatedHours.hours}h ${calculatedHours.minutes}m`;
+                      })()}
                     </span>
                   </div>
                 </div>

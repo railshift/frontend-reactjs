@@ -14,6 +14,14 @@ const CreateShiftPage = () => {
   const { success, error: showError } = useToastStore();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(null);
+
+  const handleShowError = (message) => {
+    showError(message);
+    setFormError(message);
+    setIsSubmitting(false);
+  };
+
   const [formData, setFormData] = useState({
     // Train Information
     trainNumber: '',
@@ -60,25 +68,23 @@ const CreateShiftPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setFormError(null);
     
     try {
       // Validate contact numbers
       if (formData.locoPilotPhone && !isValidPhone(formData.locoPilotPhone)) {
-        showError('Loco Pilot contact number must be a valid 10-digit Indian mobile number (optionally with +91 prefix)!');
-        setIsSubmitting(false);
+        handleShowError('Loco Pilot contact number must be a valid 10-digit Indian mobile number (optionally with +91 prefix)!');
         return;
       }
       
       if (formData.trainManagerPhone && !isValidPhone(formData.trainManagerPhone)) {
-        showError('Train Manager contact number must be a valid 10-digit Indian mobile number (optionally with +91 prefix)!');
-        setIsSubmitting(false);
+        handleShowError('Train Manager contact number must be a valid 10-digit Indian mobile number (optionally with +91 prefix)!');
         return;
       }
       
       
       if (!formData.signOnDateTime) {
-        showError('Sign-on date-time is required!');
-        setIsSubmitting(false);
+        handleShowError('Sign-on date-time is required!');
         return;
       }
       
@@ -86,8 +92,7 @@ const CreateShiftPage = () => {
       const signOn = dayjs(formData.signOnDateTime);
       
       if (!signOn.isValid()) {
-        showError('Invalid date or time format!');
-        setIsSubmitting(false);
+        handleShowError('Invalid date or time format!');
         return;
       }
 
@@ -96,13 +101,11 @@ const CreateShiftPage = () => {
       if (formData.departureDateTime) {
         const departure = dayjs(formData.departureDateTime);
         if (!departure.isValid()) {
-          showError('Invalid departure date-time format!');
-          setIsSubmitting(false);
+          handleShowError('Invalid departure date-time format!');
           return;
         }
         if (departure.isBefore(signOn)) {
-          showError('Departure date-time cannot be before sign-on date-time!');
-          setIsSubmitting(false);
+          handleShowError('Departure date-time cannot be before sign-on date-time!');
           return;
         }
       }
@@ -111,8 +114,7 @@ const CreateShiftPage = () => {
       if (formData.timeOfTO) {
         const timeOfTO = dayjs(formData.timeOfTO);
         if (!timeOfTO.isValid()) {
-          showError('Invalid Time of TO date-time format!');
-          setIsSubmitting(false);
+          handleShowError('Invalid Time of TO date-time format!');
           return;
         }
       }
@@ -169,13 +171,13 @@ const CreateShiftPage = () => {
       
     } catch (err) {
       console.error('Error creating shift:', err);
-      showError(err.response?.data?.message || 'Failed to create shift. Please try again.');
-      setIsSubmitting(false);
+      handleShowError(err.response?.data?.message || 'Failed to create shift. Please try again.');
     }
   };
 
   const handleReset = () => {
     if (window.confirm('Are you sure you want to reset the form?')) {
+      setFormError(null);
       setFormData({
         trainNumber: '',
         trainName: '',
@@ -210,6 +212,26 @@ const CreateShiftPage = () => {
             Enter shift details to start tracking duty hours for loco pilot and train manager
           </p>
         </div>
+
+        {/* Form Error Banner */}
+        {formError && (
+          <div className="mb-6 bg-red-50 border-l-4 border-red-600 p-4 rounded shadow-md flex items-start justify-between animate-fadeIn">
+            <div className="flex items-center gap-3">
+              <span className="text-red-600 text-xl font-bold">⚠</span>
+              <div>
+                <h4 className="font-bold text-red-800">Cannot Create Shift</h4>
+                <p className="text-sm text-red-700 mt-1">{formError}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFormError(null)}
+              className="text-red-600 hover:text-red-800 font-bold px-2 py-1 ml-4"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">

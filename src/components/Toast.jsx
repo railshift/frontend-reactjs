@@ -38,7 +38,7 @@ const Toast = ({
   const style = config[type] || config.info;
 
   return (
-    <div className={`fixed top-4 right-4 z-50 ${style.bg} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in-right`}>
+    <div className={`relative ${style.bg} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in-right`}>
       <div className="flex-shrink-0 text-xl">{style.icon}</div>
       <p className="flex-1 font-medium">{message}</p>
       {onClose && (

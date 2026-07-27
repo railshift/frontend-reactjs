@@ -35,8 +35,9 @@ const ActiveShiftsPage = () => {
   const canEdit = useAuthStore((state) => state.canEdit);
   const { success, warning, info } = useToastStore();
 
-  // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
+  // Pagination and filter state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [alertFilter, setAlertFilter] = useState('ALL'); // 'ALL', '8HR', '10HR', '12HR', 'RELIEF'
 
   // Utility function to calculate duty hours
   const calculateDutyHours = (signOnTime, endTime = currentTime) => {
@@ -94,6 +95,15 @@ const ActiveShiftsPage = () => {
             };
           });
     const shiftPagination = activeShiftsData?.pagination || { page: 1, pages: 1, total: 0 };
+
+    const filteredShifts = (allActiveShifts || []).filter(shift => {
+      const hours = calculateDutyHours(shift.signOnTime).totalHours;
+      if (alertFilter === '8HR') return hours >= 8 && hours < 10;
+      if (alertFilter === '10HR') return hours >= 10 && hours < 12;
+      if (alertFilter === '12HR') return hours >= 12;
+      if (alertFilter === 'RELIEF') return shift.reliefPlanned;
+      return true;
+    });
 
   // Update current time every second for live tracking
   useEffect(() => {
@@ -221,30 +231,133 @@ const ActiveShiftsPage = () => {
           </div>
         </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500">
-            <p className="text-sm text-gray-600">Total Active</p>
+        {/* Statistics - Clickable to Filter */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div 
+            onClick={() => setAlertFilter('ALL')}
+            className={`bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500 cursor-pointer transition-all hover:shadow-lg ${
+              alertFilter === 'ALL' ? 'ring-2 ring-[#003d82] bg-blue-50/30' : ''
+            }`}
+          >
+            <p className="text-sm text-gray-600 font-medium">Total Active</p>
             <p className="text-3xl font-bold text-gray-800">{shiftPagination.total}</p>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-yellow-500">
-            <p className="text-sm text-gray-600">Alerts (8+ hrs)</p>
+          <div 
+            onClick={() => setAlertFilter('8HR')}
+            className={`bg-white rounded-lg shadow-md p-4 border-l-4 border-yellow-500 cursor-pointer transition-all hover:shadow-lg ${
+              alertFilter === '8HR' ? 'ring-2 ring-yellow-500 bg-yellow-50/30' : ''
+            }`}
+          >
+            <p className="text-sm text-gray-600 font-medium">Alerts (8+ hrs)</p>
             <p className="text-3xl font-bold text-gray-800">
-              {activeShifts.filter(s => calculateDutyHours(s.signOnTime).totalHours >= 8).length}
+              {(allActiveShifts || []).filter(s => {
+                const h = calculateDutyHours(s.signOnTime).totalHours;
+                return h >= 8 && h < 10;
+              }).length}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-red-500">
-            <p className="text-sm text-gray-600">Critical (12+ hrs)</p>
+          <div 
+            onClick={() => setAlertFilter('10HR')}
+            className={`bg-white rounded-lg shadow-md p-4 border-l-4 border-orange-500 cursor-pointer transition-all hover:shadow-lg ${
+              alertFilter === '10HR' ? 'ring-2 ring-orange-500 bg-orange-50/30' : ''
+            }`}
+          >
+            <p className="text-sm text-gray-600 font-medium">Warnings (10+ hrs)</p>
             <p className="text-3xl font-bold text-gray-800">
-              {activeShifts.filter(s => calculateDutyHours(s.signOnTime).totalHours >= 12).length}
+              {(allActiveShifts || []).filter(s => {
+                const h = calculateDutyHours(s.signOnTime).totalHours;
+                return h >= 10 && h < 12;
+              }).length}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-blue-500">
-            <p className="text-sm text-gray-600">Relief Planned</p>
+          <div 
+            onClick={() => setAlertFilter('12HR')}
+            className={`bg-white rounded-lg shadow-md p-4 border-l-4 border-red-500 cursor-pointer transition-all hover:shadow-lg ${
+              alertFilter === '12HR' ? 'ring-2 ring-red-500 bg-red-50/30' : ''
+            }`}
+          >
+            <p className="text-sm text-gray-600 font-medium">Critical (12+ hrs)</p>
             <p className="text-3xl font-bold text-gray-800">
-              {activeShifts.filter(s => s.reliefPlanned).length}
+              {(allActiveShifts || []).filter(s => calculateDutyHours(s.signOnTime).totalHours >= 12).length}
             </p>
           </div>
+          <div 
+            onClick={() => setAlertFilter('RELIEF')}
+            className={`bg-white rounded-lg shadow-md p-4 border-l-4 border-blue-500 cursor-pointer transition-all hover:shadow-lg ${
+              alertFilter === 'RELIEF' ? 'ring-2 ring-blue-500 bg-blue-50/30' : ''
+            }`}
+          >
+            <p className="text-sm text-gray-600 font-medium">Relief Planned</p>
+            <p className="text-3xl font-bold text-gray-800">
+              {(allActiveShifts || []).filter(s => s.reliefPlanned).length}
+            </p>
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex gap-2 flex-wrap items-center bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+          <span className="text-sm font-semibold text-gray-700 mr-2 flex items-center gap-1">
+            <FaClock className="text-[#003d82]" /> Filter Alerts:
+          </span>
+          <button
+            onClick={() => setAlertFilter('ALL')}
+            className={`px-4 py-1.5 rounded-full font-semibold text-sm transition-all ${
+              alertFilter === 'ALL'
+                ? 'bg-[#003d82] text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            All ({allActiveShifts?.length || 0})
+          </button>
+          <button
+            onClick={() => setAlertFilter('8HR')}
+            className={`px-4 py-1.5 rounded-full font-semibold text-sm transition-all flex items-center gap-1.5 ${
+              alertFilter === '8HR'
+                ? 'bg-yellow-500 text-white shadow-md'
+                : 'bg-yellow-50 text-yellow-800 hover:bg-yellow-100'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>
+            8+ Hr Alerts ({(allActiveShifts || []).filter(s => {
+              const h = calculateDutyHours(s.signOnTime).totalHours;
+              return h >= 8 && h < 10;
+            }).length})
+          </button>
+          <button
+            onClick={() => setAlertFilter('10HR')}
+            className={`px-4 py-1.5 rounded-full font-semibold text-sm transition-all flex items-center gap-1.5 ${
+              alertFilter === '10HR'
+                ? 'bg-orange-500 text-white shadow-md'
+                : 'bg-orange-50 text-orange-800 hover:bg-orange-100'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
+            10+ Hr Warnings ({(allActiveShifts || []).filter(s => {
+              const h = calculateDutyHours(s.signOnTime).totalHours;
+              return h >= 10 && h < 12;
+            }).length})
+          </button>
+          <button
+            onClick={() => setAlertFilter('12HR')}
+            className={`px-4 py-1.5 rounded-full font-semibold text-sm transition-all flex items-center gap-1.5 ${
+              alertFilter === '12HR'
+                ? 'bg-red-600 text-white shadow-md'
+                : 'bg-red-50 text-red-800 hover:bg-red-100'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+            12+ Hr Critical ({(allActiveShifts || []).filter(s => calculateDutyHours(s.signOnTime).totalHours >= 12).length})
+          </button>
+          <button
+            onClick={() => setAlertFilter('RELIEF')}
+            className={`px-4 py-1.5 rounded-full font-semibold text-sm transition-all flex items-center gap-1.5 ${
+              alertFilter === 'RELIEF'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-blue-50 text-blue-800 hover:bg-blue-100'
+            }`}
+          >
+            Relief Planned ({(allActiveShifts || []).filter(s => s.reliefPlanned).length})
+          </button>
         </div>
 
         {/* Active Shifts List */}
@@ -264,8 +377,20 @@ const ActiveShiftsPage = () => {
                 actionLabel="Create New Shift"
               />
             </div>
+          ) : filteredShifts.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <FaCheckCircle className="text-4xl text-green-500 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-gray-700">No shifts match this filter</h3>
+              <p className="text-gray-500 mt-1">There are currently no active shifts in the selected alert category.</p>
+              <button
+                onClick={() => setAlertFilter('ALL')}
+                className="mt-4 px-4 py-2 bg-[#003d82] text-white rounded-lg text-sm font-semibold hover:bg-[#002b5c] transition"
+              >
+                Show All Shifts
+              </button>
+            </div>
           ) : (
-            allActiveShifts.map((shift) => {
+            filteredShifts.map((shift) => {
               const dutyHours = calculateDutyHours(shift.signOnTime);
               const alert = getAlertLevelDisplay(dutyHours.totalHours);
               
